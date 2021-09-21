@@ -118,9 +118,20 @@ class Burrow {
 
   public List<String> getClusterBootstrapServers(String cluster) throws IOException {
     final Map<String, Object> response = this.request(cluster);
+    LOG.debug("Burrow response:\n" + response.toString());
     final Map<String, Object> clusterDetail = (Map<String, Object>) response.get("cluster");
+    if (clusterDetail == null) {
+      throw new IOException("response doesn't contain `cluster`");
+    }
     final Map<String, Object> module = (Map<String, Object>) clusterDetail.get("module");
-    return (List<String>) module.get("servers");
+    if (module == null) {
+      throw new IOException("response doesn't contain `cluster.module`");
+    }
+    List<String> servers = (List<String>) module.get("servers");
+    if (servers == null) {
+      throw new IOException("response doesn't contain `cluster.module.servers`");
+    }
+    return servers;
   }
 
   public class ClusterClient {
